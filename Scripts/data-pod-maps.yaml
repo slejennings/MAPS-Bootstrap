@@ -16,16 +16,30 @@ spec:
     operator: Exists
   restartPolicy: Never
   initContainers:
-  - name: get-files
+  - name: make-maps-dir
     image: bitnami/git:latest
     command: ["/bin/bash"]
-    args: ["mkdir -p /data/MAPS", "-c", "curl -o /data/MAPS/get-data-birds.sh \"https://raw.githubusercontent.com/slejennings/MAPS-Bootstrap/refs/heads/main/Scripts/get-data-birds.sh\"", "/data/MAPS/get-data-birds.sh"]
+    args: ["-c", "mkdir -p /data/MAPS"] #"&& curl -o /data/MAPS/get-data-birds.sh \"https://raw.githubusercontent.com/slejennings/MAPS-Bootstrap/refs/heads/main/Scripts/get-data-birds.sh\" && /data/MAPS/get-data-birds.sh"]
+    volumeMounts:
+    - mountPath: /data
+      name: data
+  - name: get-sh
+    image: bitnami/git:latest
+    command: ["/bin/bash"]
+    args: ["-c", "curl -o /data/MAPS/get-data-birds.sh \"https://raw.githubusercontent.com/slejennings/MAPS-Bootstrap/refs/heads/main/Scripts/get-data-birds.sh\""]
+    volumeMounts:
+    - mountPath: /data
+      name: data
+  - name: download-files
+    image: python:3 #for wget
+    command: ["bash", "/data/MAPS/get-data-birds.sh"]
     volumeMounts:
     - mountPath: /data
       name: data
   containers:
   - name: data
     image: gitlab-registry.nrp-nautilus.io/sappleby/r-containers/rbirds:latest
+    #command: ["bash", "-c", "ls /data; sleep 3600"]
     command: ["Rscript", "/data/MAPS/bird_data_prep.R"]
     resources:
       limits:        
