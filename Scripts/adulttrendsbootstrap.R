@@ -209,3 +209,147 @@ system.time(SOSP_11106 %>%
                           control = glmmTMBControl(parallel = 8)))) # 400.679
 
 
+
+############### Working out code to process one species at a time  #################
+
+# make small data set to get code figured out
+
+idtry <- c("BS0001", "BS0002", "BS0003", "BS0004", "BS0005")
+STAtry <- c("11106", "11101")
+
+SOSPtest_dat <- SOSP %>% 
+  filter(STA %in% STAtry) %>%
+  filter(id %in% idtry)
+
+# this will work on one species at a time
+SPEC_trial <- SOSPtest_dat %>%
+  group_by(SPEC_STA, unique_id) %>% # group by unique_id to get all rows for a model
+  nest() %>% # make a nested data frame with each unique_id 
+  mutate(GPmod = map(data, ~ safely(glm_wrapped, otherwise="error") # put safely wrapped glmmTMB model into column
+                     (Adult ~ year, data = .x, offset = log(.x$Effort), family=genpois, 
+                       control = glmmTMBControl(parallel = 4))),
+         Err = map(GPmod, "error"), # put model error messages into a column
+         Res = map(GPmod, "result")) %>% # put model results into a colum
+  filter(Err == "NULL") %>% # filter to keep only models with no error messages
+  mutate(tidyGP = map(Res, broom.mixed::tidy, conf.int=T, conf.level=0.95)) %>% # tidy model results for models with no errors
+  unnest(tidyGP) %>% # unnest the tidied model output
+  filter(term == "year") %>% # drop estimates for intercept and keep only those for year
+  filter(!is.na(std.error)) %>% # drop models that did not converge. These models will not have estimates for SE
+  dplyr::select(-data, -GPmod, -Err, -Res, -effect, -component, -term) %>%
+  group_by(SPEC_STA) %>%
+  summarize(mean_tstat = mean(statistic, na.rm=T), # get summary statistics using the values from the 1000 models
+            conf.low_tstat = quantile(statistic, 0.025, na.rm=T),
+            conf.high_tstat = quantile(statistic, 0.975, na.rm=T),
+            mean_slope = mean(estimate, na.rm=T), 
+            conf.low_slope = quantile(estimate, 0.025, na.rm=T),
+            conf.high_slope = quantile(estimate, 0.975, na.rm=T),
+            mean_SE = mean(std.error, na.rm=T), 
+            conf.low_SE = quantile(std.error, 0.025, na.rm=T),
+            conf.high_SE = quantile(std.error, 0.975, na.rm=T))
+
+  
+# this will work on one species/station combo at a time
+# this is probably more useful
+# each species/station combo is 1000 models
+SOSP11106_dat <- SOSP %>% filter(STA == "11106")
+
+system.time(SOSP11106_trial <- SOSP11106_dat %>%
+  group_by(unique_id) %>% # group by unique_id to get all rows for a model
+  nest() %>% # make a nested data frame with each unique_id 
+  mutate(GPmod = map(data, ~ safely(glm_wrapped, otherwise="error") # put safely wrapped glmmTMB model into column
+                     (Adult ~ year, data = .x, offset = log(.x$Effort), family=genpois, 
+                       control = glmmTMBControl(parallel = 4))),
+         Err = map(GPmod, "error"), # put model error messages into a column
+         Res = map(GPmod, "result")) %>% # put model results into a colum
+  filter(Err == "NULL") %>% # filter to keep only models with no error messages
+  mutate(tidyGP = map(Res, broom.mixed::tidy, conf.int=T, conf.level=0.95)) %>% # tidy model results for models with no errors
+  unnest(tidyGP) %>% # unnest the tidied model output
+  filter(term == "year") %>% # drop estimates for intercept and keep only those for year
+  filter(!is.na(std.error)) %>% # drop models that did not converge. These models will not have estimates for SE
+  dplyr::select(-data, -GPmod, -Err, -Res, -effect, -component, -term) %>%
+  ungroup() %>% # remove prior grouping as we want to summarize across all unique_ids
+  summarize(mean_tstat = mean(statistic, na.rm=T), # get summary statistics using the values from the 1000 models
+            conf.low_tstat = quantile(statistic, 0.025, na.rm=T),
+            conf.high_tstat = quantile(statistic, 0.975, na.rm=T),
+            mean_slope = mean(estimate, na.rm=T), 
+            conf.low_slope = quantile(estimate, 0.025, na.rm=T),
+            conf.high_slope = quantile(estimate, 0.975, na.rm=T),
+            mean_SE = mean(std.error, na.rm=T), 
+            conf.low_SE = quantile(std.error, 0.025, na.rm=T),
+            conf.high_SE = quantile(std.error, 0.975, na.rm=T))
+)
+# this takes 12 minutes
+
+
+##############################################################################
+##############################################################################
+
+# Use code from above to run bootstrapped models
+adulttrends_boot <- readRDS(here("Data", "adulttrends_boot.rds"))
+
+# the above is slow to load
+# split species into separate data frames
+adulttrends_boot %>% 
+  nest_by(SPEC) %>%
+  mutate(data = set_names(list(data), SPEC)) %>%
+  list2env(x = .$data, envir = globalenv())
+
+# starting with SOSP (song sparrow)
+# create a list where each station is a tibble within the list
+SOSP_boot_list <-SOSP %>% 
+  group_split(SPEC_STA) %>% 
+  setNames(unique(SOSP$SPEC_STA))
+
+# define safely wrapped model function
+glm_wrapped <- function(formula, ...){
+  args <- list(formula = formula, ...)
+  do.call(glmmTMB::glmmTMB, args)}
+
+# get a list of stations where SOSP occur
+STAlist  <- SOSP %>%
+  select(SPEC_STA) %>%
+  distinct() %>%
+  slice(1:40) %>%
+  pull(SPEC_STA)
+
+# run models
+# create an object for each 1000 models (aka each species/station combination)
+# loop over all stations for a species
+for(i in 1:length(SOSP_boot_list))
+{
+  assign(paste0("m_", unique(SOSP_boot_list[[i]]$SPEC_STA)), # assign a name to each object
+  SOSP_boot_list[[i]] %>%
+        group_by(unique_id) %>% # group by unique_id to get all rows for a model
+        nest() %>% # make a nested data frame with each unique_id 
+        mutate(GPmod = map(data, ~ safely(glm_wrapped, otherwise="error") # put safely wrapped glmmTMB model into column
+                          (Adult ~ year, data = .x, offset = log(.x$Effort), family=genpois, 
+                          control = glmmTMBControl(parallel = 4))),
+                Err = map(GPmod, "error"), # put model error messages into a column
+                Res = map(GPmod, "result")) %>% # put model results into a column
+        filter(Err == "NULL") %>% # filter to keep only models with no error messages
+        mutate(tidyGP = map(Res, broom.mixed::tidy, conf.int=T, conf.level=0.95)) %>% # tidy model results for models with no errors
+        unnest(tidyGP) %>% # unnest the tidied model output
+        filter(term == "year") %>% # drop estimates for intercept and keep only those for year
+        filter(!is.na(std.error)) %>% # drop models that did not converge. These models will not have estimates for SE
+        dplyr::select(-data, -GPmod, -Err, -Res, -effect, -component, -term) %>%
+        ungroup() %>% # remove prior grouping as we want to summarize across all unique_ids
+        summarize(mean_tstat = mean(statistic, na.rm=T), # get summary statistics using the values from the 1000 models
+                  conf.low_tstat = quantile(statistic, 0.025, na.rm=T),
+                  conf.high_tstat = quantile(statistic, 0.975, na.rm=T),
+                  mean_slope = mean(estimate, na.rm=T), 
+                  conf.low_slope = quantile(estimate, 0.025, na.rm=T),
+                  conf.high_slope = quantile(estimate, 0.975, na.rm=T),
+                  mean_SE = mean(std.error, na.rm=T), 
+                  conf.low_SE = quantile(std.error, 0.025, na.rm=T),
+                  conf.high_SE = quantile(std.error, 0.975, na.rm=T))
+  )
+}
+
+# pull all models from the environment and put them into a list
+# then convert them into a data frame
+SOSP_modlist <- mget(ls(pattern = "m_SOSP")) %>% # look for objects with string "m_SOSP" in the environment and place them into a list
+  enframe() %>% unnest(value) # make list into data frame and unnest the average model statistics
+
+# save as RDS
+saveRDS(SOSP_modlist, here("Models", "SOSP_modlist.rds"))
+
