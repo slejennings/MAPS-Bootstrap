@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: viewer-pod
+  name: data-combine-pod-maps
 spec:
   affinity:
     nodeAffinity:
@@ -11,24 +11,29 @@ spec:
             - key: nautilus.io/csu-tide
               operator: Exists
   tolerations:
-  - key: nautilus.io/csu-tide
+  - effect: NoSchedule
+    key: nautilus.io/csu-tide
     operator: Exists
-    effect: NoSchedule
-  - key: nautilus.io/arm64
-    operator: Exists
-    effect: NoSchedule
   restartPolicy: Never
+  initContainers:
+  - name: get-rscript
+    image: bitnami/git:latest
+    command: ["/bin/bash"]
+    args: ["-c", "curl -o /data/MAPS/combine-data-maps.R \"https://raw.githubusercontent.com/slejennings/MAPS-Bootstrap/refs/heads/main/Scripts/combine-data-maps.R\""]
+    volumeMounts:
+    - mountPath: /data
+      name: data
   containers:
-  - name: viewer
+  - name: run-datacombine
     image: gitlab-registry.nrp-nautilus.io/sappleby/r-containers/rbirds-multiarch:latest
-    command: ["bash", "-c", "ls /data; sleep 5000"]
+    command: ["Rscript", "data/MAPS/combine-data-maps.R"]
     resources:
       limits:        
-        cpu: 2
-        memory: 2Gi
+        cpu: 16
+        memory: 32Gi
       requests:
-        cpu: 2
-        memory: 2Gi
+        cpu: 6
+        memory: 16Gi
     volumeMounts:
     - mountPath: /data
       name: data

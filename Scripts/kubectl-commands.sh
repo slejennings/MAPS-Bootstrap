@@ -10,6 +10,9 @@ ns=cal-poly-appleby
 ## You can also replace the yaml file with another pod definition you want to start
 kubectl -n $ns apply -f 00-viewer-pod.yaml 
 
+## This one forces the viewer to run on an ARM64 node, for testing purposes
+kubectl -n $ns apply -f 00-viewer-pod-arm.yaml 
+
 ## To delet the viewer pod (or any other pod):
 kubectl -n $ns delete -f 00-viewer-pod.yaml
 
@@ -46,3 +49,7 @@ kubectl -n $ns get pods --watch ## when the above finishes, exit the pod status 
 kubectl -n $ns delete -f 01B-data-pod-maps-pt2.yaml
 ## Note: the below command will run all 3.9 MILLION MODELS.  Be sure you want to do this!
 kubectl -n $ns apply -f 02-indexed-job-maps.yaml
+kubectl -n $ns apply -f 02-indexed-job-maps-ex.yaml
+
+## get a summary of the jobs
+kubectl describe jobs/maps-e-job
