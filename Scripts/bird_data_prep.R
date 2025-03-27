@@ -16,6 +16,8 @@ for(species in unique(adulttrends_boot$SPEC)) {
   
   if (!dir.exists(sppoutdir)) dir.create(sppoutdir,recursive=TRUE)
   
+  if (!dir.exists("inputs")) dir.create("inputs")
+  
   saveRDS(onespecies,file=(paste0("inputs/",species,".rds")))
 }
 

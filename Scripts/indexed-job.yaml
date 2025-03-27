@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: indexed-job-example-birds
+  name: indexed-job-example
 spec:
   completions: 20
   parallelism: 10
@@ -9,14 +9,21 @@ spec:
   template:
     spec:
       priorityClassName: opportunistic
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nautilus.io/csu-tide
+                operator: Exists
       containers:
-      - name: birds
-        image: gitlab-registry.nrp-nautilus.io/sappleby/r-containers/rbirds:latest
-        command: ["/bin/bash", "/data/MAPS/maps-run.sh"]
+      - name: pre-processor
+        image: python:3
+        command: ["/bin/bash", "/data/test/wiki-text.sh"]
         resources:
           limits:
-            cpu: 4
-            memory: 8Gi
+            cpu: 2
+            memory: 2Gi
           requests:
             cpu: 2
             memory: 2Gi
@@ -26,9 +33,6 @@ spec:
       restartPolicy: Never
       tolerations:
       - key: nautilus.io/csu-tide
-        operator: Exists
-        effect: NoSchedule
-      - key: nautilus.io/arm64
         operator: Exists
         effect: NoSchedule
       volumes:
