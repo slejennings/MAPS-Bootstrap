@@ -3,8 +3,8 @@ kind: Job
 metadata:
   name: maps-job
 spec:
-  completions: 1
-  parallelism: 1
+  completions: 3
+  parallelism: 2
   completionMode: Indexed
   template:
     spec:
@@ -15,7 +15,7 @@ spec:
         workingDir: /data/MAPS
         command: 
         - bash
-        - c
+        - -c
         - "Rscript maps-run.R"
         resources:
           limits:

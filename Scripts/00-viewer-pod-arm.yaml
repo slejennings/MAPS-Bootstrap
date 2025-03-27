@@ -3,13 +3,7 @@ kind: Pod
 metadata:
   name: viewer-pod
 spec:
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-            - key: nautilus.io/csu-tide
-              operator: Exists
+  nodeName: k8s-altra-01.sdsc.optiputer.net
   tolerations:
   - key: nautilus.io/csu-tide
     operator: Exists

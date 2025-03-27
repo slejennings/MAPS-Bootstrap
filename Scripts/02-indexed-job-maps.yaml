@@ -10,16 +10,15 @@ spec:
     spec:
       priorityClassName: opportunistic
       containers:
-      - name: birds
-        image: gitlab-registry.nrp-nautilus.io/sappleby/r-containers/rbirds:latest
-        command: 
-        - bash
-        - c
-        - "Rscript maps-run.R"
+      - name: maps-models
+        image: gitlab-registry.nrp-nautilus.io/sappleby/r-containers/rbirds-multiarch:latest
+        workingDir: /data/MAPS
+        command: ["Rscript"]
+        args: ["maps-run.R"]
         resources:
           limits:
-            cpu: 4
-            memory: 8Gi
+            cpu: 3
+            memory: 4Gi
           requests:
             cpu: 2
             memory: 2Gi
