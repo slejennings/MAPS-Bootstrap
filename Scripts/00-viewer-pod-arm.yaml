@@ -15,7 +15,7 @@ spec:
   containers:
   - name: viewer
     image: gitlab-registry.nrp-nautilus.io/sappleby/r-containers/rbirds-multiarch:latest
-    command: ["bash", "-c", "ls /data; sleep 3600"]
+    command: ["bash", "-c", "ls /data; sleep 5000"]
     resources:
       limits:        
         cpu: 1

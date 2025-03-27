@@ -17,11 +17,11 @@ spec:
         args: ["maps-run.R"]
         resources:
           limits:
-            cpu: 3
-            memory: 4Gi
+            cpu: 2
+            memory: 1.2Gi
           requests:
             cpu: 2
-            memory: 2Gi
+            memory: 1Gi
         volumeMounts:
         - mountPath: /data
           name: data

@@ -45,4 +45,4 @@ kubectl -n $ns apply -f 01B-data-pod-maps-pt2.yaml
 kubectl -n $ns get pods --watch ## when the above finishes, exit the pod status screen (ctrl-c), then you can delete 01B and run 02
 kubectl -n $ns delete -f 01B-data-pod-maps-pt2.yaml
 ## Note: the below command will run all 3.9 MILLION MODELS.  Be sure you want to do this!
-kubectl -n $ns apply -f 01B-data-pod-maps-pt2.yaml
+kubectl -n $ns apply -f 02-indexed-job-maps.yaml
