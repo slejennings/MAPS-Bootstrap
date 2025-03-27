@@ -5,6 +5,8 @@ library(glmmTMB)
 ### Get Info from SLURM about this run ###
 task_id <- as.numeric(Sys.getenv("JOB_COMPLETION_INDEX"))
 
+#if (is.na(task_id)) task_id=0 ## include this for testing purposes when not run as an indexed job
+
 ## Load the species / site index table
 MAPS_run_table <- readRDS("MAPS_run_table.rds")
 
@@ -20,7 +22,7 @@ run_species_station <- MAPS_run_info$SPEC_STA
 run_species_data <- readRDS(paste0("inputs/",run_species,".rds"))
 
 run_species_station_data <- run_species_data |>
-  filter(STA==station)
+  filter(STA==run_station)
 
 # define safely wrapped model function
 glm_wrapped <- function(formula, ...){

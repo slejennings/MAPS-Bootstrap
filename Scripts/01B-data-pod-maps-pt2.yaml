@@ -19,14 +19,14 @@ spec:
   - name: get-sh
     image: bitnami/git:latest
     command: ["/bin/bash"]
-    args: ["-c", "curl -o /data/MAPS/get-data-birds-job.sh \"https://raw.githubusercontent.com/slejennings/MAPS-Bootstrap/refs/heads/main/Scripts/get-data-birds-job.sh\""]
+    args: ["-c", "curl -o /data/MAPS/get-data-birds-pt2.sh \"https://raw.githubusercontent.com/slejennings/MAPS-Bootstrap/refs/heads/main/Scripts/get-data-birds-pt2.sh\""]
     volumeMounts:
     - mountPath: /data
       name: data
   containers:
   - name: get-job-scripts
     image: python:3 #for curl
-    command: ["bash", "data/MAPS/get-data-birds-job.sh"]
+    command: ["bash", "data/MAPS/get-data-birds-pt2.sh"]
     resources:
       limits:        
         cpu: 16

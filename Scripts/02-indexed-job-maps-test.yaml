@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: maps-job
+spec:
+  completions: 1
+  parallelism: 1
+  completionMode: Indexed
+  template:
+    spec:
+      priorityClassName: opportunistic
+      containers:
+      - name: birds
+        image: gitlab-registry.nrp-nautilus.io/sappleby/r-containers/rbirds:latest
+        workingDir: /data/MAPS
+        command: 
+        - bash
+        - c
+        - "Rscript maps-run.R"
+        resources:
+          limits:
+            cpu: 3
+            memory: 4Gi
+          requests:
+            cpu: 2
+            memory: 2Gi
+        volumeMounts:
+        - mountPath: /data
+          name: data
+      restartPolicy: Never
+      tolerations:
+      - key: nautilus.io/csu-tide
+        operator: Exists
+        effect: NoSchedule
+      - key: nautilus.io/arm64
+        operator: Exists
+        effect: NoSchedule
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: appleby-volume
