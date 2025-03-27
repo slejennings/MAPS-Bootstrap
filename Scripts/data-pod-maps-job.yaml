@@ -23,16 +23,10 @@ spec:
     volumeMounts:
     - mountPath: /data
       name: data
-  - name: download-files
-    image: python:3 #for wget
-    command: ["bash", "data/MAPS/get-data-birds.sh"]
-    volumeMounts:
-    - mountPath: /data
-      name: data
   containers:
-  - name: data
+  - name: get-job-scripts
     image: python:3 #for curl
-    command: ["bash", "-c", "ls /data; sleep 3600"]
+    command: ["bash", "data/MAPS/get-data-birds-job.sh"]
     resources:
       limits:        
         cpu: 16

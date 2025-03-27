@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: indexed-job-example-birds
+  name: maps-job
 spec:
-  completions: 20
-  parallelism: 10
+  completions: 3
+  parallelism: 2
   completionMode: Indexed
   template:
     spec:
