@@ -4,9 +4,6 @@ library(glmmTMB)
 ### Get Info from SLURM about this run ###
 task_id <- as.numeric(Sys.getenv("JOB_COMPLETION_INDEX"))
 
-task_id=2
-run_species_station=run_species_station2
-
 ## Load the species / site index table
 MAPS_run_table <- readRDS("MAPS_run_table.rds")
 
@@ -24,36 +21,13 @@ run_species_data <- readRDS(paste0("inputs/",species,".rds"))
 run_species_station_data <- run_species_data |>
   filter(STA==station)
 
-MAPS_run_info2 <- MAPS_run_table |>
-  filter(runINDEX==3)
-
-species2 <- MAPS_run_info2$SPEC
-station2 <- MAPS_run_info2$STA
-run_species_station2 <- MAPS_run_info2$SPEC_STA
-run_species_data2 <- readRDS(paste0("inputs/",species2,".rds"))
-
-run_species_station_data2 <- run_species_data2 |>
-  filter(STA==station2)
-
-# starting with SOSP (song sparrow)
-# create a list where each station is a tibble within the list
-SOSP_boot_list2 <- run_species_station_data2 %>% 
-  group_split(SPEC_STA) %>% 
-  setNames(unique(run_species_station_data2$SPEC_STA))
-
-SOSP_boot_list3 <- run_species_data2 %>% 
-  group_split(SPEC_STA) %>% 
-  setNames(unique(run_species_data2$SPEC_STA))
-
 # define safely wrapped model function
 glm_wrapped <- function(formula, ...){
   args <- list(formula = formula, ...)
   do.call(glmmTMB::glmmTMB, args)}
 
-
 # run models for each 1000 models (aka each species/station combination) summarize and assign a name to each object
-run_species_station_out0 <- run_species_station_data2 |> 
-  slice(1:2000) |>## Take the data from one station/species combination
+run_species_station_out <- run_species_station_data |>## Take the data from one station/species combination
   group_by(unique_id) |> # group by unique_id to get all rows for a model
   nest() |> # make a nested data frame with each unique_id 
   mutate(GPmod = map(data, ~ safely(glm_wrapped, otherwise="error") # put safely wrapped glmmTMB model into column
