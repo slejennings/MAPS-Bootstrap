@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: data-pod-maps
+  name: data-pod-maps-job
 spec:
   affinity:
     nodeAffinity:

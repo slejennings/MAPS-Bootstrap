@@ -12,7 +12,10 @@ spec:
       containers:
       - name: birds
         image: gitlab-registry.nrp-nautilus.io/sappleby/r-containers/rbirds:latest
-        command: ["/bin/bash", "/data/MAPS/maps-run.sh"]
+        command: 
+        - bash
+        - c
+        - "Rscript maps-run.R"
         resources:
           limits:
             cpu: 4

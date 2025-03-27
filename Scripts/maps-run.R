@@ -17,7 +17,7 @@ run_station <- MAPS_run_info$STA
 run_species_station <- MAPS_run_info$SPEC_STA
 
 ## Load the data for the species being run
-run_species_data <- readRDS(paste0("inputs/",species,".rds"))
+run_species_data <- readRDS(paste0("inputs/",run_species,".rds"))
 
 run_species_station_data <- run_species_data |>
   filter(STA==station)

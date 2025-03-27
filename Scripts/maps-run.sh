@@ -3,5 +3,5 @@
 # Move to /data/MAPS for following commands
 cd /data/MAPS
 
-# Call the pre-process program
-Rscript maps-run.R #$JOB_COMPLETION_INDEX
+# Call the pre-process program $JOB_COMPLETION_INDEX
+Rscript maps-run.R

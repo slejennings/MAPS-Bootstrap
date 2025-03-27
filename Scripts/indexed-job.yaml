@@ -19,7 +19,10 @@ spec:
       containers:
       - name: pre-processor
         image: python:3
-        command: ["/bin/bash", "/data/test/wiki-text.sh"]
+        command: 
+        - bash
+        - c
+        - "cd /data/MAPS && Rscript maps-run.R"
         resources:
           limits:
             cpu: 2
