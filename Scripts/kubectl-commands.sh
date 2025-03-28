@@ -59,6 +59,7 @@ kubectl -n $ns apply -f 03-data-combine-pod-maps.yaml
 ## And delete it when it's done
 kubectl -n $ns delete -f 03-data-combine-pod-maps.yaml
 ## Then transfer the final table from the cluster (it will end up in whatever directory you're in on the command line when you excecute it)
+## The viewer pod needs to still be running though, FYI!
 kubectl -n $ns cp viewer-pod:/data/MAPS/MAPS_output_table.rds ./MAPS_output_table.rds
 
 ## Once you are sure everything's done, be sure to delete the jobs to free up scheduling space on the cluster! (Your pods aren't taking up processing power or memory now, but the logs and scheduler info for all those pods is still in memory on the scheduling pod.)
