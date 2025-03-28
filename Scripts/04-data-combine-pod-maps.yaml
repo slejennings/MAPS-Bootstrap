@@ -26,7 +26,8 @@ spec:
   containers:
   - name: run-datacombine
     image: gitlab-registry.nrp-nautilus.io/sappleby/r-containers/rbirds-multiarch:latest
-    command: ["Rscript", "data/MAPS/combine-data-maps.R"]
+    workingDir: /data/MAPS
+    command: ["Rscript", "combine-data-maps.R"]
     resources:
       limits:        
         cpu: 16

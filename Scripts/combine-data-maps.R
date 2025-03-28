@@ -1,3 +1,8 @@
-## Combine all the runs together
+## Combine all the MAPS runs together##
+library(tidyverse)
 
-a<-bind_rows(readRDS("ACFL_14420.rds"), readRDS("ACFL_14422.rds"), readRDS("ACFL_14423.rds"))
+maps_output_table <- list.files(path="outputs/",pattern=".rds",recursive=TRUE,full.names=TRUE) |>
+  map(readRDS) |>
+  list_rbind()
+
+saveRDS(maps_output_table,file="MAPS_output_table.rds")
