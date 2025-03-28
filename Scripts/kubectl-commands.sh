@@ -48,8 +48,18 @@ kubectl -n $ns apply -f 01B-data-pod-maps-pt2.yaml
 kubectl -n $ns get pods --watch ## when the above finishes, exit the pod status screen (ctrl-c), then you can delete 01B and run 02
 kubectl -n $ns delete -f 01B-data-pod-maps-pt2.yaml
 ## Note: the below command will run all 3.9 MILLION MODELS.  Be sure you want to do this!
-kubectl -n $ns apply -f 02-indexed-job-maps.yaml
-kubectl -n $ns apply -f 02-indexed-job-maps-ex.yaml
+kubectl -n $ns apply -f 02-indexed-job-maps.yaml # This one will run everywhere on anything but there seems to be a problem with how that's handeled on the cluster side
+kubectl -n $ns apply -f 02-indexed-job-maps-ex.yaml # This one only runs on CSU-affiliated cluster components
 
 ## get a summary of the jobs
 kubectl describe jobs/maps-e-job
+
+## Once everything is complete, use this to combine everything together:
+kubectl -n $ns apply -f 03-data-combine-pod-maps.yaml
+## And delete it when it's done
+kubectl -n $ns delete -f 03-data-combine-pod-maps.yaml
+## Then transfer the final table from the cluster (it will end up in whatever directory you're in on the command line when you excecute it)
+kubectl -n $ns cp viewer-pod:/data/MAPS/MAPS_output_table.rds ./MAPS_output_table.rds
+
+## Once you are sure everything's done, be sure to delete the jobs to free up scheduling space on the cluster! (Your pods aren't taking up processing power or memory now, but the logs and scheduler info for all those pods is still in memory on the scheduling pod.)
+kubectl -n $ns delete -f 02-indexed-job-maps-ex.yaml
