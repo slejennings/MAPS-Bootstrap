@@ -49,6 +49,7 @@ kubectl -n $ns get pods --watch ## when the above finishes, exit the pod status 
 kubectl -n $ns delete -f 01B-data-pod-maps-pt2.yaml
 ## Note: the below command will run all 3.9 MILLION MODELS.  Be sure you want to do this!
 kubectl -n $ns apply -f 02-indexed-job-maps.yaml # This one will run everywhere on anything but there seems to be a problem with how that's handeled on the cluster side
+kubectl -n $ns apply -f 02-indexed-job-maps-2.yml # This one runs everywhere but is not opportunistic and only tries to run 120 at once
 kubectl -n $ns apply -f 02-indexed-job-maps-ex.yaml # This one only runs on CSU-affiliated cluster components
 
 ## get a summary of the jobs
