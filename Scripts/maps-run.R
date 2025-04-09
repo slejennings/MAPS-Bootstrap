@@ -7,7 +7,7 @@ library(parameters)
 ### Get Info from SLURM about this run ###
 task_id <- as.numeric(Sys.getenv("JOB_COMPLETION_INDEX"))
 
-if (is.na(task_id)) task_id=299 ## include this for testing purposes when not run as an indexed job
+#if (is.na(task_id)) task_id=299 ## include this for testing purposes when not run as an indexed job
 
 ## Load the species / site index table
 MAPS_run_table <- readRDS("MAPS_run_table.rds")
