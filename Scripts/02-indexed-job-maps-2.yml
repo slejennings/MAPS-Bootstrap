@@ -3,33 +3,33 @@ kind: Job
 metadata:
   name: maps-2-job
 spec:
-  completions: 3 #3940
-  parallelism: 2 #120
+  completions: 3940
+  parallelism: 120
   completionMode: Indexed
   template:
     spec:
       affinity:
         nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 10
+            preference:
+              matchExpressions:
               - key: topology.kubernetes.io/region
                 operator: In
                 values:
                 - us-west
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 5
-              preference:
-                matchExpressions:
-                - key: nautilus.io/csu-tide
-                  operator: Exists
-            - weight: 50
-              preference:
-                matchExpressions:
-                - key: feature.node.kubernetes.io/pci-10de.present
-                  operator: NotIn
-                  values:
-                  - "true"
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: nautilus.io/csu-tide
+                operator: Exists
+          - weight: 50
+            preference:
+              matchExpressions:
+              - key: feature.node.kubernetes.io/pci-10de.present
+                operator: NotIn
+                values:
+                - "true"
       containers:
       - name: maps-models
         image: gitlab-registry.nrp-nautilus.io/sappleby/r-containers/rbirds-multiarch:latest
