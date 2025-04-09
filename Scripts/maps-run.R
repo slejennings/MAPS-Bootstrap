@@ -2,6 +2,7 @@
 library(tidyverse)
 library(glmmTMB)
 library(broom.mixed)
+library(parameters)
 
 ### Get Info from SLURM about this run ###
 task_id <- as.numeric(Sys.getenv("JOB_COMPLETION_INDEX"))
@@ -46,14 +47,27 @@ run_species_station_out <- run_species_station_data |>## Take the data from one 
   dplyr::select(-data, -GPmod, -Err, -Res, -effect, -component, -term) |>
   ungroup() |> # remove prior grouping as we want to summarize across all unique_ids
   summarize(mean_tstat = mean(statistic, na.rm=T), # get summary statistics using the values from the 1000 models
+            median_tstat = median(statistic, na.rm=T),
+            max_tstat = max(statistic, na.rm=T),
+            min_tstat = min(statistic, na.rm=T),
             conf.low_tstat = quantile(statistic, 0.025, na.rm=T),
             conf.high_tstat = quantile(statistic, 0.975, na.rm=T),
+            skew_tstat = parameters::skewness(statistic, na.rm=T)$Skewness,
             mean_slope = mean(estimate, na.rm=T), 
+            median_slope = median(estimate, na.rm=T),
+            min_slope = min(estimate, na.rm=T),
+            max_slope = min(estimate, na.rm=T),
             conf.low_slope = quantile(estimate, 0.025, na.rm=T),
             conf.high_slope = quantile(estimate, 0.975, na.rm=T),
+            skew_slope = parameters::skewness(estimate, na.rm=T)$Skewness,
             mean_SE = mean(std.error, na.rm=T), 
+            median_SE = median(std.error, na.rm=T),
+            min_SE = min(std.error, na.rm=T),
+            max_SE = min(std.error, na.rm=T),
             conf.low_SE = quantile(std.error, 0.025, na.rm=T),
-            conf.high_SE = quantile(std.error, 0.975, na.rm=T)) |>
+            conf.high_SE = quantile(std.error, 0.975, na.rm=T),
+            skew_SE = parameters::skewness(std.error, na.rm=T)$Skewness,
+            model_count = n())|>
   mutate(SPEC_STA=run_species_station) |>
   mutate(k8sindex=task_id)
 
