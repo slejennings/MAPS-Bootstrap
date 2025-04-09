@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: maps-2-job
+spec:
+  completions: 3 #3940
+  parallelism: 2 #120
+  completionMode: Indexed
+  template:
+    spec:
+      containers:
+      - name: maps-models
+        image: gitlab-registry.nrp-nautilus.io/sappleby/r-containers/rbirds-multiarch:latest
+        workingDir: /data/MAPS
+        command: ["Rscript"]
+        args: ["maps-run.R"]
+        resources:
+          limits:
+            cpu: 2
+            memory: 1200Mi
+          requests:
+            cpu: 2
+            memory: 1000Mi
+        volumeMounts:
+        - mountPath: /data
+          name: data
+      restartPolicy: Never
+      tolerations:
+      - key: nautilus.io/csu-tide
+        operator: Exists
+        effect: NoSchedule
+      - key: nautilus.io/arm64
+        operator: Exists
+        effect: NoSchedule
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: appleby-volume
