@@ -3,8 +3,8 @@ kind: Job
 metadata:
   name: maps-e-job
 spec:
-  completions: 3940
-  parallelism: 350
+  completions: 3 #3940
+  parallelism: 2 #350
   completionMode: Indexed
   template:
     spec:
@@ -13,7 +13,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: nautilus.io/csu-tide
+              - key: topology.kubernetes.io/region/us-west
                 operator: Exists
       containers:
       - name: maps-models
