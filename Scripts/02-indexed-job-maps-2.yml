@@ -18,11 +18,6 @@ spec:
                 operator: In
                 values:
                 - us-west
-          - weight: 1
-            preference:
-              matchExpressions:
-              - key: nautilus.io/csu-tide
-                operator: Exists
           - weight: 50
             preference:
               matchExpressions:
