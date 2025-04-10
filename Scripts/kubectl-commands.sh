@@ -65,3 +65,5 @@ kubectl -n $ns cp viewer-pod:/data/MAPS/MAPS_output_table.rds ./MAPS_output_tabl
 
 ## Once you are sure everything's done, be sure to delete the jobs to free up scheduling space on the cluster! (Your pods aren't taking up processing power or memory now, but the logs and scheduler info for all those pods is still in memory on the scheduling pod.)
 kubectl -n $ns delete -f 02-indexed-job-maps-ex.yaml
+
+kubectl -n $ns delete -f 02-indexed-job-maps-2.yml 
