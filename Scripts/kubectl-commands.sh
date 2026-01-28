@@ -6,6 +6,9 @@ cd Documents/R_github/MAPS-Bootstrap/Scripts
 ## To save your namespace string and not keep typing it:
 ns=cal-poly-appleby
 
+## To set up a default namespace
+kubectl config set contexts.nautilus.namespace cal-poly-appleby
+
 ## To start up the viewer pod (with the same image that will be used for MAPS runs, in this case, so can be used to test things as well)
 ## You can also replace the yaml file with another pod definition you want to start
 kubectl -n $ns apply -f 00-viewer-pod.yaml 
